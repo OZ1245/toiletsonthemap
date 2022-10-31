@@ -7,34 +7,44 @@
       class="map"
     >
       <l-tile-layer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        :url="url"
         layer-type="base"
+        :attribution="attribution"
         name="OpenStreetMap"
       ></l-tile-layer>
     </l-map>
   </div>
 </template>
 
-<script>
-import { defineComponent } from "vue";
+<script setup>
+import { ref, onMounted } from "vue";
 import { LMap, LTileLayer } from "@vue-leaflet/vue-leaflet";
 import "leaflet/dist/leaflet.css";
 
-export default defineComponent({
-  name: 'OsmMap',
+const url = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+const attribution = '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors';
 
-  components: {
-    LMap,
-    LTileLayer,
-  },
+const zoom = ref(2);
+const center = ref([47.41322, -1.219482]);
 
-  data() {
-    return {
-      zoom: 2,
-      center: [47.41322, -1.219482]
-    };
-  },
-});
+onMounted(() => {
+  if (navigator.geolocation) {
+    // Geolocation available
+    const geolocation = navigator.geolocation
+
+    geolocation.watchPosition(result => {
+      console.log(result)
+    })
+
+    geolocation.getCurrentPosition((result) => {
+      console.log(result)
+      center.value = [result.coords.latitude, result.coords.longitude];
+      zoom.value = 10;
+    }, (result) => {
+      throw result;
+    });
+  }
+})
 </script>
 
 <style lang="scss" scoped>
